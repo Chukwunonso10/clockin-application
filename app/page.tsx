@@ -72,7 +72,7 @@ export default async function LandingPage() {
             href="/sign-up"
             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl shadow-indigo-500/30 transition-all duration-200 active:scale-95 text-base"
           >
-            <span>Deploy as Employee</span>
+            <span>Sign up as an Employee</span>
             <ArrowRight className="h-5 w-5" />
           </Link>
           <Link
