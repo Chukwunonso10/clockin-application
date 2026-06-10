@@ -45,29 +45,53 @@ export async function syncUser() {
   });
 
   if (!dbUser) {
-    // If it's the very first user, let's make them ADMIN
-    const userCount = await prisma.user.count();
-    const role = userCount === 0 ? "ADMIN" : "EMPLOYEE";
-
-    dbUser = await prisma.user.create({
-      data: {
-        clerkId: clerkUser.id,
-        name,
-        email,
-        role,
-        status: "ACTIVE",
-      },
+    // Check if user already exists by email (to handle Clerk account recreations or manual database seedings)
+    dbUser = await prisma.user.findUnique({
+      where: { email },
       include: { department: true },
     });
 
-    // Write Audit Log
-    await prisma.auditLog.create({
-      data: {
-        userId: dbUser.id,
-        action: "USER_SYNC_REGISTER",
-        metadata: JSON.stringify({ role, email, name }),
-      },
-    });
+    if (dbUser) {
+      // Reconnect existing user to the new Clerk session
+      dbUser = await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { clerkId: clerkUser.id, name },
+        include: { department: true },
+      });
+
+      // Write Audit Log
+      await prisma.auditLog.create({
+        data: {
+          userId: dbUser.id,
+          action: "USER_SYNC_RECONNECT",
+          metadata: JSON.stringify({ email, newClerkId: clerkUser.id }),
+        },
+      });
+    } else {
+      // If it's the very first user, let's make them ADMIN
+      const userCount = await prisma.user.count();
+      const role = userCount === 0 ? "ADMIN" : "EMPLOYEE";
+
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId: clerkUser.id,
+          name,
+          email,
+          role,
+          status: "ACTIVE",
+        },
+        include: { department: true },
+      });
+
+      // Write Audit Log
+      await prisma.auditLog.create({
+        data: {
+          userId: dbUser.id,
+          action: "USER_SYNC_REGISTER",
+          metadata: JSON.stringify({ role, email, name }),
+        },
+      });
+    }
   } else {
     // Keep DB synchronized with Clerk name / email changes
     if (dbUser.name !== name || dbUser.email !== email) {

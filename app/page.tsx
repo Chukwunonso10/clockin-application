@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Clock, CheckSquare, ShieldCheck, Zap, ArrowRight, UserCheck, Activity } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
+import Image from "next/image";
 
 export default async function LandingPage() {
   // Check auth - redirect to dashboard if already logged in
@@ -21,8 +22,12 @@ export default async function LandingPage() {
       {/* Header / Navbar */}
       <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between border-b border-zinc-900/60 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20">
-            <Clock className="h-6 w-6 animate-pulse" />
+          <div className="p-1 rounded-xl bg-zinc-900 border border-zinc-850 shadow-lg shrink-0">
+            <img
+              src="/arible logo.jpeg"
+              alt="Arible Estates Logo"
+              className="h-8 w-8 rounded-lg object-cover"
+            />
           </div>
           <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
             Arible<span className="text-indigo-400">Estates</span>
@@ -75,12 +80,12 @@ export default async function LandingPage() {
             <span>Sign up as an Employee</span>
             <ArrowRight className="h-5 w-5" />
           </Link>
-          <Link
+          {/* <Link
             href="/sign-in"
             className="inline-flex items-center justify-center border border-zinc-800 hover:bg-zinc-900 text-zinc-300 px-8 py-4 rounded-2xl font-bold transition-all duration-200 active:scale-95 text-base"
           >
             Admin Access
-          </Link>
+          </Link> */}
         </div>
 
         {/* Feature Cards Grid */}
