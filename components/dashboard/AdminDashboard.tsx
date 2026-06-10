@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -21,6 +21,7 @@ import {
   Layers,
   Search,
   LogOut,
+  RefreshCw,
 } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
 import {
@@ -94,6 +95,33 @@ export function AdminDashboard({
   const [departments, setDepartments] = useState<Department[]>(initialDepartments);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
   const [activeTab, setActiveTab] = useState<"analytics" | "attendance" | "users" | "departments">("analytics");
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchLatestAttendance = async (silent = false) => {
+    if (!silent) setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/attendance");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const json = await res.json();
+      if (json.data) {
+        setAttendance(json.data);
+      }
+    } catch (error) {
+      console.error("Error refreshing attendance:", error);
+    } finally {
+      if (!silent) setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    // Poll for changes every 10 seconds to keep the admin dashboard updated in real-time
+    const interval = setInterval(() => {
+      fetchLatestAttendance(true);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -334,15 +362,27 @@ export function AdminDashboard({
           </p>
         </div>
         
-        <SignOutButton>
+        <div className="flex items-center gap-3 self-start md:self-auto">
           <Button
             variant="outline"
-            className="border-zinc-800 hover:border-rose-900/40 hover:bg-rose-950/10 hover:text-rose-400 text-zinc-300 font-semibold rounded-xl flex items-center gap-2 active:scale-[0.98] transition-all self-start md:self-auto"
+            onClick={() => fetchLatestAttendance(false)}
+            loading={isRefreshing}
+            className="border-zinc-800 hover:bg-zinc-900 text-zinc-300 font-semibold rounded-xl flex items-center gap-2 active:scale-[0.98] transition-all"
           >
-            <LogOut className="h-4 w-4" />
-            <span>Log Out</span>
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span>Refresh</span>
           </Button>
-        </SignOutButton>
+
+          <SignOutButton>
+            <Button
+              variant="outline"
+              className="border-zinc-800 hover:border-rose-900/40 hover:bg-rose-950/10 hover:text-rose-400 text-zinc-300 font-semibold rounded-xl flex items-center gap-2 active:scale-[0.98] transition-all"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Log Out</span>
+            </Button>
+          </SignOutButton>
+        </div>
       </div>
 
       {/* Stats Cards Row */}
