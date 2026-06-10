@@ -109,11 +109,18 @@ export async function clockIn(data: {
   }
 
   // Geofencing Check
-  const latConfig = process.env.NEXT_PUBLIC_OFFICE_LATITUDE;
-  const lngConfig = process.env.NEXT_PUBLIC_OFFICE_LONGITUDE;
-  const radiusConfig = process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS;
+  const configList = await prisma.systemConfig.findMany();
+  const config = Object.fromEntries(configList.map((c) => [c.key, c.value]));
 
-  if (latConfig && lngConfig && radiusConfig) {
+  const latConfig = config["office_latitude"] || process.env.NEXT_PUBLIC_OFFICE_LATITUDE;
+  const lngConfig = config["office_longitude"] || process.env.NEXT_PUBLIC_OFFICE_LONGITUDE;
+  const radiusConfig = config["office_radius"] || process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS;
+
+  const geofenceEnabled = config["geofence_enabled"] !== undefined
+    ? config["geofence_enabled"] === "true"
+    : (!!latConfig && !!lngConfig && !!radiusConfig);
+
+  if (geofenceEnabled && latConfig && lngConfig && radiusConfig) {
     const officeLat = parseFloat(latConfig);
     const officeLng = parseFloat(lngConfig);
     const allowedRadius = parseFloat(radiusConfig);
@@ -524,4 +531,40 @@ export async function getPersonalAttendance() {
     where: { userId: user.id },
     orderBy: { date: "desc" },
   });
+}
+
+// 13. Admin: Update Geofence Config
+export async function adminUpdateGeofenceConfig(data: {
+  enabled: boolean;
+  latitude: string;
+  longitude: string;
+  radius: string;
+}) {
+  const admin = await assertAdmin();
+
+  const updates = [
+    { key: "geofence_enabled", value: String(data.enabled) },
+    { key: "office_latitude", value: data.latitude.trim() },
+    { key: "office_longitude", value: data.longitude.trim() },
+    { key: "office_radius", value: data.radius.trim() },
+  ];
+
+  for (const item of updates) {
+    await prisma.systemConfig.upsert({
+      where: { key: item.key },
+      update: { value: item.value },
+      create: { key: item.key, value: item.value },
+    });
+  }
+
+  // Log Audit
+  await prisma.auditLog.create({
+    data: {
+      userId: admin.id,
+      action: "ADMIN_UPDATE_GEOFENCE_CONFIG",
+      metadata: JSON.stringify(data),
+    },
+  });
+
+  return { success: true };
 }

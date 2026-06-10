@@ -70,3 +70,8 @@ model NotificationSubscription {
   auth      String
   createdAt DateTime @default(now())
 }
+
+model SystemConfig {
+  key   String @id
+  value String
+}

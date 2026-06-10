@@ -46,6 +46,17 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
+  // Fetch Geofence Config from Database
+  const configList = await prisma.systemConfig.findMany();
+  const config = Object.fromEntries(configList.map((c) => [c.key, c.value]));
+
+  const geofenceConfig = {
+    enabled: config["geofence_enabled"] === "true",
+    latitude: config["office_latitude"] || process.env.NEXT_PUBLIC_OFFICE_LATITUDE || "",
+    longitude: config["office_longitude"] || process.env.NEXT_PUBLIC_OFFICE_LONGITUDE || "",
+    radius: config["office_radius"] || process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS || "100",
+  };
+
   if (user.status === "DISABLED") {
     return (
       <div className="flex-1 flex items-center justify-center bg-zinc-950 p-6">
@@ -121,6 +132,7 @@ export default async function DashboardPage() {
           initialUsers={serializedUsers}
           initialDepartments={serializedDepts}
           initialAttendance={serializedAttendance}
+          geofenceConfig={geofenceConfig}
         />
       </div>
     );
@@ -154,6 +166,7 @@ export default async function DashboardPage() {
       <EmployeeDashboard
         initialUser={serializedUser}
         initialHistory={serializedHistory}
+        geofenceConfig={geofenceConfig}
       />
     </div>
   );

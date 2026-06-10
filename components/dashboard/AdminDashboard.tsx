@@ -22,15 +22,17 @@ import {
   Search,
   LogOut,
   RefreshCw,
+  MapPin,
 } from "lucide-react";
-import { SignOutButton } from "@clerk/nextjs";
 import {
   adminToggleUserStatus,
   adminUpdateUserRole,
   adminCreateDepartment,
   adminAssignUserDepartment,
   adminEditAttendance,
+  adminUpdateGeofenceConfig,
 } from "@/app/actions";
+import { SignOutButton } from "@clerk/nextjs";
 import { exportToCSV, exportToExcel } from "@/lib/export";
 import {
   ResponsiveContainer,
@@ -84,31 +86,92 @@ interface AdminDashboardProps {
   initialUsers: User[];
   initialDepartments: Department[];
   initialAttendance: AttendanceRecord[];
+  geofenceConfig: {
+    enabled: boolean;
+    latitude: string;
+    longitude: string;
+    radius: string;
+  };
 }
 
 export function AdminDashboard({
   initialUsers,
   initialDepartments,
   initialAttendance,
+  geofenceConfig,
 }: AdminDashboardProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [departments, setDepartments] = useState<Department[]>(initialDepartments);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
-  const [activeTab, setActiveTab] = useState<"analytics" | "attendance" | "users" | "departments">("analytics");
+  const [activeTab, setActiveTab] = useState<"analytics" | "attendance" | "users" | "departments" | "settings">("analytics");
+
+  const [geofenceEnabled, setGeofenceEnabled] = useState(geofenceConfig.enabled);
+  const [officeLat, setOfficeLat] = useState(geofenceConfig.latitude);
+  const [officeLng, setOfficeLng] = useState(geofenceConfig.longitude);
+  const [officeRadius, setOfficeRadius] = useState(geofenceConfig.radius);
+  const [loadingConfig, setLoadingConfig] = useState(false);
+
+  const handleUpdateConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingConfig(true);
+    try {
+      await adminUpdateGeofenceConfig({
+        enabled: geofenceEnabled,
+        latitude: officeLat,
+        longitude: officeLng,
+        radius: officeRadius,
+      });
+      alert("Geofencing configuration updated successfully!");
+    } catch (err: any) {
+      alert("Failed to update settings: " + err.message);
+    } finally {
+      setLoadingConfig(false);
+    }
+  };
+
+  const detectOfficeLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setOfficeLat(pos.coords.latitude.toFixed(6));
+        setOfficeLng(pos.coords.longitude.toFixed(6));
+        alert("Coordinates updated with your current location!");
+      },
+      (err) => {
+        alert("Failed to acquire location: " + err.message);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchLatestAttendance = async (silent = false) => {
     if (!silent) setIsRefreshing(true);
     try {
-      const res = await fetch("/api/attendance");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const json = await res.json();
-      if (json.data) {
-        setAttendance(json.data);
+      const [resAttendance, resUsers] = await Promise.all([
+        fetch("/api/attendance"),
+        fetch("/api/users"),
+      ]);
+
+      if (!resAttendance.ok || !resUsers.ok) throw new Error("Failed to fetch");
+
+      const [jsonAttendance, jsonUsers] = await Promise.all([
+        resAttendance.json(),
+        resUsers.json(),
+      ]);
+
+      if (jsonAttendance.data) {
+        setAttendance(jsonAttendance.data);
+      }
+      if (jsonUsers.data) {
+        setUsers(jsonUsers.data);
       }
     } catch (error) {
-      console.error("Error refreshing attendance:", error);
+      console.error("Error refreshing dashboard:", error);
     } finally {
       if (!silent) setIsRefreshing(false);
     }
@@ -484,6 +547,18 @@ export function AdminDashboard({
         >
           <Layers className="h-4 w-4" />
           <span>Departments</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("settings")}
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
+            activeTab === "settings"
+              ? "border-indigo-500 text-indigo-400 bg-zinc-900/30"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <Settings className="h-4 w-4" />
+          <span>System Settings</span>
         </button>
       </div>
 
@@ -962,23 +1037,121 @@ export function AdminDashboard({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/50">
-                    {departments.map((dept) => (
-                      <tr
-                        key={dept.id}
-                        className="hover:bg-zinc-900/30 transition-colors text-sm text-zinc-300"
-                      >
-                        <td className="p-4 font-semibold text-zinc-200">{dept.name}</td>
-                        <td className="p-4 text-zinc-400">{dept.description || "—"}</td>
-                        <td className="p-4 text-right font-mono text-zinc-200 font-semibold">
-                          {dept._count?.users || 0} users
-                        </td>
-                      </tr>
-                    ))}
+                    {departments.map((dept) => {
+                      const headcount = users.filter((u) => u.departmentId === dept.id).length;
+                      return (
+                        <tr
+                          key={dept.id}
+                          className="hover:bg-zinc-900/30 transition-colors text-sm text-zinc-300"
+                        >
+                          <td className="p-4 font-semibold text-zinc-200">{dept.name}</td>
+                          <td className="p-4 text-zinc-405">{dept.description || "—"}</td>
+                          <td className="p-4 text-right font-mono text-zinc-200 font-semibold">
+                            {headcount} users
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </CardContent>
             </Card>
 
+          </div>
+        )}
+
+        {/* Tab 5: Settings */}
+        {activeTab === "settings" && (
+          <div className="max-w-xl mx-auto space-y-6">
+            <Card className="border-zinc-800 bg-zinc-950/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-indigo-400" />
+                  <span>Office Geofencing Configuration</span>
+                </CardTitle>
+                <CardDescription>
+                  Restrict employee check-in and check-out logs to your physical office coordinates.
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleUpdateConfig}>
+                <CardContent className="space-y-4">
+                  {/* Toggle Geofencing */}
+                  <div className="flex items-center justify-between p-4 bg-zinc-900/40 rounded-xl border border-zinc-800/80">
+                    <div>
+                      <h4 className="font-semibold text-sm text-zinc-200">Enable GPS Geofencing</h4>
+                      <p className="text-xs text-zinc-500 mt-0.5">
+                        Enforces physical location verification before allowing staff to clock in or out.
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={geofenceEnabled}
+                        onChange={(e) => setGeofenceEnabled(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-zinc-850 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white peer-checked:after:border-white"></div>
+                    </label>
+                  </div>
+
+                  {geofenceEnabled && (
+                    <div className="space-y-4 pt-2 border-t border-zinc-800/60">
+                      <div className="flex gap-4">
+                        <Input
+                          label="Office Latitude"
+                          type="text"
+                          required
+                          placeholder="e.g. 40.7128"
+                          value={officeLat}
+                          onChange={(e) => setOfficeLat(e.target.value)}
+                          className="flex-1"
+                        />
+                        <Input
+                          label="Office Longitude"
+                          type="text"
+                          required
+                          placeholder="e.g. -74.0060"
+                          value={officeLng}
+                          onChange={(e) => setOfficeLng(e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={detectOfficeLocation}
+                          className="w-full text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2"
+                        >
+                          <MapPin className="h-3.5 w-3.5 text-indigo-400" />
+                          <span>Autofill with My Current Location</span>
+                        </Button>
+                      </div>
+
+                      <Input
+                        label="Allowed Boundary Radius (Meters)"
+                        type="number"
+                        required
+                        placeholder="e.g. 100"
+                        value={officeRadius}
+                        onChange={(e) => setOfficeRadius(e.target.value)}
+                      />
+                      
+                      <p className="text-xs text-zinc-500 leading-relaxed font-normal">
+                        Tip: Walk into the center of the office, click **"Autofill"** to capture coordinates automatically, then save settings. Employees must be within this boundary to check in.
+                      </p>
+                    </div>
+                  )}
+
+                </CardContent>
+                <div className="p-6 border-t border-zinc-800/80 flex items-center justify-end">
+                  <Button type="submit" variant="primary" loading={loadingConfig} className="w-full sm:w-auto font-bold px-6">
+                    Save Geofencing Rules
+                  </Button>
+                </div>
+              </form>
+            </Card>
           </div>
         )}
 

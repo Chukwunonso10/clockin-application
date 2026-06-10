@@ -44,9 +44,19 @@ interface EmployeeDashboardProps {
     department: { name: string } | null;
   };
   initialHistory: AttendanceRecord[];
+  geofenceConfig: {
+    enabled: boolean;
+    latitude: string;
+    longitude: string;
+    radius: string;
+  };
 }
 
-export function EmployeeDashboard({ initialUser, initialHistory }: EmployeeDashboardProps) {
+export function EmployeeDashboard({
+  initialUser,
+  initialHistory,
+  geofenceConfig,
+}: EmployeeDashboardProps) {
   const [history, setHistory] = useState<AttendanceRecord[]>(initialHistory);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isOnline, setIsOnline] = useState(true);
@@ -62,11 +72,11 @@ export function EmployeeDashboard({ initialUser, initialHistory }: EmployeeDashb
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [vapidSupported, setVapidSupported] = useState(false);
 
-  // Office Config loaded from Env (in client components they must be prefixed with NEXT_PUBLIC_)
-  const officeLat = parseFloat(process.env.NEXT_PUBLIC_OFFICE_LATITUDE || "");
-  const officeLng = parseFloat(process.env.NEXT_PUBLIC_OFFICE_LONGITUDE || "");
-  const officeRadius = parseFloat(process.env.NEXT_PUBLIC_OFFICE_RADIUS_METERS || "100");
-  const hasGeofence = !isNaN(officeLat) && !isNaN(officeLng);
+  // Office Config loaded from database config prop
+  const officeLat = parseFloat(geofenceConfig.latitude || "");
+  const officeLng = parseFloat(geofenceConfig.longitude || "");
+  const officeRadius = parseFloat(geofenceConfig.radius || "100");
+  const hasGeofence = !!geofenceConfig.enabled && !isNaN(officeLat) && !isNaN(officeLng);
 
   // Sync online status
   useEffect(() => {
