@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Enterprise Clock-In & Attendance System",
-  description: "Secure Employee Clock-In and HR Attendance Management PWA",
+  title: "Arible Estate & Properties Ltd | Attendance System",
+  description: "Secure Employee Clock-In and Attendance Management portal for Arible Estate & Properties Ltd",
   manifest: "/manifest.ts",
 };
 

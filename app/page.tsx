@@ -25,7 +25,7 @@ export default async function LandingPage() {
             <Clock className="h-6 w-6 animate-pulse" />
           </div>
           <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
-            ClockIn<span className="text-indigo-400">PWA</span>
+            Arible<span className="text-indigo-400">Estates</span>
           </span>
         </div>
 
@@ -56,14 +56,14 @@ export default async function LandingPage() {
 
         {/* Hero Headlines */}
         <h1 className="max-w-4xl text-5xl sm:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-          Enterprise Attendance Management,{" "}
+          Arible Estate & Properties,{" "}
           <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Simplified
+            Attendance Portal
           </span>
         </h1>
         
         <p className="max-w-2xl text-lg sm:text-xl text-zinc-400 leading-relaxed mb-10">
-          A security-focused, geofenced employee clock-in application with offline synchronization, custom push notifications, and administrative reporting dashboards.
+          A security-focused, geofenced employee clock-in and attendance management application customized for Arible Estate and Properties Ltd.
         </p>
 
         {/* CTA Buttons */}
@@ -191,7 +191,7 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-zinc-900 py-8 text-center text-xs text-zinc-600 bg-zinc-950">
-        <p>© {new Date().getFullYear()} ClockInPWA. All rights reserved. Built for modern enterprise networks.</p>
+        <p>© {new Date().getFullYear()} Arible Estate and Properties Ltd. All rights reserved. Built for modern enterprise networks.</p>
       </footer>
 
     </div>
