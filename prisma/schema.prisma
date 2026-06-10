@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String                     @id @default(uuid())
+  clerkId      String                     @unique
+  name         String
+  email        String                     @unique
+  role         String                     @default("EMPLOYEE") // ADMIN | EMPLOYEE
+  status       String                     @default("ACTIVE")   // ACTIVE | DISABLED
+  departmentId String?
+  department   Department?                @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  attendances  Attendance[]
+  auditLogs    AuditLog[]
+  subscriptions NotificationSubscription[]
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Attendance {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime  // Date only (time stripped, e.g. YYYY-MM-DDT00:00:00Z)
+  clockInTime  DateTime
+  clockOutTime DateTime?
+  status       String    // PRESENT | LATE | ABSENT | HALF_DAY | ON_LEAVE | REMOTE
+  hoursWorked  Float?
+  location     String?   // "latitude,longitude"
+  ipAddress    String?
+  deviceInfo   String?   // Browser/OS info
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, date])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  metadata  String?  // JSON stringified metadata
+  timestamp DateTime @default(now())
+}
+
+model NotificationSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
