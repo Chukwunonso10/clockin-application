@@ -500,10 +500,10 @@ export function AdminDashboard({
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800 mb-8 gap-1">
+      <div className="flex border-b border-zinc-800 mb-8 gap-1 overflow-x-auto whitespace-nowrap scrollbar-none pb-px w-full">
         <button
           onClick={() => setActiveTab("analytics")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
             activeTab === "analytics"
               ? "border-indigo-500 text-indigo-400 bg-zinc-900/30"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -512,10 +512,10 @@ export function AdminDashboard({
           <BarChart3 className="h-4 w-4" />
           <span>Analytics Overview</span>
         </button>
-
+ 
         <button
           onClick={() => setActiveTab("attendance")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
             activeTab === "attendance"
               ? "border-indigo-500 text-indigo-400 bg-zinc-900/30"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -524,10 +524,10 @@ export function AdminDashboard({
           <Calendar className="h-4 w-4" />
           <span>Attendance Monitor</span>
         </button>
-
+ 
         <button
           onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
             activeTab === "users"
               ? "border-indigo-500 text-indigo-400 bg-zinc-900/30"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -536,10 +536,10 @@ export function AdminDashboard({
           <Users className="h-4 w-4" />
           <span>Employee Directory</span>
         </button>
-
+ 
         <button
           onClick={() => setActiveTab("departments")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
             activeTab === "departments"
               ? "border-indigo-500 text-indigo-400 bg-zinc-900/30"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -548,10 +548,10 @@ export function AdminDashboard({
           <Layers className="h-4 w-4" />
           <span>Departments</span>
         </button>
-
+ 
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-5 py-3 border-b-2 font-medium text-sm transition-all duration-200 cursor-pointer ${
             activeTab === "settings"
               ? "border-indigo-500 text-indigo-400 bg-zinc-900/30"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -647,7 +647,7 @@ export function AdminDashboard({
                 </div>
 
                 <div className="mt-4 p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 leading-relaxed">
-                  Tip: Work starts officially at 8:00 AM. Employees checking in after 8:15 AM are flagged automatically as "LATE".
+                  Tip: Work starts officially at 8:00 AM. Employees checking in after 8:10 AM are flagged automatically as "LATE".
                 </div>
               </CardContent>
             </Card>

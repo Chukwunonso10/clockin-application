@@ -170,13 +170,13 @@ export async function clockIn(data: {
   }
 
   // Late Arrival Detection
-  // Work Start Time is 8:00 AM. Grace period till 8:15 AM.
+  // Work Start Time is 8:00 AM. Grace period till 8:10 AM.
   // We check the local hours/minutes based on the server's current time.
   const hours = now.getHours();
   const minutes = now.getMinutes();
   let status = "PRESENT";
 
-  if (hours > 8 || (hours === 8 && minutes > 15)) {
+  if (hours > 8 || (hours === 8 && minutes > 10)) {
     status = "LATE";
   }
 

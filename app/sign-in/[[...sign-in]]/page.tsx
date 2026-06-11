@@ -2,11 +2,11 @@ import { SignIn } from "@clerk/nextjs";
 
 export default function SignInPage() {
   return (
-    <div className="flex-1 flex items-center justify-center bg-zinc-950 min-h-screen p-6 relative">
+    <div className="flex-1 flex items-center justify-center bg-zinc-950 min-h-screen p-4 sm:p-6 relative">
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/10 blur-[120px] pointer-events-none" />
       
-      <div className="z-10 bg-zinc-905/30 backdrop-blur-md border border-zinc-800/50 p-4 sm:p-8 rounded-3xl shadow-2xl">
+      <div className="z-10 w-full max-w-[400px] bg-zinc-905/30 backdrop-blur-md border border-zinc-800/50 p-3 xs:p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
         <SignIn
           forceRedirectUrl="/dashboard"
           appearance={{
@@ -19,7 +19,7 @@ export default function SignInPage() {
               colorTextSecondary: "#a1a1aa",
             },
             elements: {
-              card: "bg-transparent shadow-none border-none p-0",
+              card: "bg-transparent shadow-none border-none p-0 max-w-full w-full",
               headerTitle: "text-zinc-100 font-extrabold",
               headerSubtitle: "text-zinc-400",
               socialButtonsBlockButton: "border-zinc-800 hover:bg-zinc-900 text-zinc-100",
