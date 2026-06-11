@@ -5,22 +5,74 @@
   --foreground: #171717;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Arible Theme: Deep Navy/Slate Neutrals */
+  --color-zinc-50: #f8fafc;
+  --color-zinc-100: #f1f5f9;
+  --color-zinc-200: #e2e8f0;
+  --color-zinc-300: #cbd5e1;
+  --color-zinc-400: #94a3b8;
+  --color-zinc-500: #64748b;
+  --color-zinc-600: #475569;
+  --color-zinc-700: #334155;
+  --color-zinc-800: #1e293b;
+  --color-zinc-850: #0f1c3f; /* Dark Navy Blue-Zinc surface */
+  --color-zinc-900: #081129; /* Dark Navy Blue-Zinc background */
+  --color-zinc-950: #04091a; /* Deeper Dark Navy-Zinc background */
+
+  /* Arible Theme: Royal/Electric Blue Accent (replaces Indigo) */
+  --color-indigo-50: #f0f6ff;
+  --color-indigo-100: #e0edff;
+  --color-indigo-200: #bad6ff;
+  --color-indigo-300: #7cb2ff;
+  --color-indigo-400: #3884ff;
+  --color-indigo-50: #2563eb; /* Primary Electric Blue */
+  --color-indigo-600: #1d4ed8;
+  --color-indigo-700: #1d4ed8;
+  --color-indigo-800: #1e40af;
+  --color-indigo-900: #1e3a8a;
+  --color-indigo-950: #091636;
+
+  /* Arible Theme: Logo Crimson Red Accent (replaces Purple & Pink) */
+  --color-purple-50: #fff5f5;
+  --color-purple-100: #ffe3e3;
+  --color-purple-200: #ffc9c9;
+  --color-purple-300: #ffa3a3;
+  --color-purple-400: #ff6b6b;
+  --color-purple-500: #fa3e3e; /* Logo Red Accent */
+  --color-purple-600: #e02424;
+  --color-purple-700: #c21a1a;
+  --color-purple-800: #9b1c1c;
+  --color-purple-900: #7f1d1d;
+  --color-purple-950: #4a0b0b;
+
+  --color-pink-50: #fff5f5;
+  --color-pink-100: #ffe3e3;
+  --color-pink-200: #ffc9c9;
+  --color-pink-300: #ffa3a3;
+  --color-pink-400: #ff6b6b;
+  --color-pink-500: #fa3e3e; /* Logo Red Accent */
+  --color-pink-600: #e02424;
+  --color-pink-700: #c21a1a;
+  --color-pink-800: #9b1c1c;
+  --color-pink-900: #7f1d1d;
+  --color-pink-950: #4a0b0b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #04091a;
+    --foreground: #f1f5f9;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
